@@ -6,10 +6,11 @@ from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 block_cipher = None
 
-# rembg ships ONNX runtime and model data that must be bundled
+# rembg ships model data that must be bundled.
+# Do NOT use collect_submodules("onnxruntime") — it crashes on Windows during
+# PyInstaller analysis. The pyinstaller-hooks-contrib hook handles it correctly.
 rembg_datas   = collect_data_files("rembg")
-onnx_datas    = collect_data_files("onnxruntime")
-hiddenimports = collect_submodules("rembg") + collect_submodules("onnxruntime")
+rembg_hidden  = collect_submodules("rembg")
 
 a = Analysis(
     ["main.py"],
@@ -18,8 +19,8 @@ a = Analysis(
     datas=[
         ("icons/icon.png",  "icons"),
         ("icons/icon.ico",  "icons"),
-    ] + rembg_datas + onnx_datas,
-    hiddenimports=hiddenimports + [
+    ] + rembg_datas,
+    hiddenimports=rembg_hidden + [
         "PIL._tkinter_finder",
     ],
     hookspath=[],
