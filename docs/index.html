@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BG Remover — AI Batch Background Removal, 100% Offline</title>
+  <meta name="description" content="Drop your character sprites and art; get clean transparent PNGs without cloud APIs, subscriptions, or watermarks. Powered by BiRefNet and U2Net.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:     #111318;
+      --panel:  #1a1e26;
+      --card:   #1f2430;
+      --border: #2a2e3a;
+      --acc:    #2d6aff;
+      --acc2:   #1e4ab0;
+      --green:  #1a7a45;
+      --text:   #c8cdd8;
+      --dim:    #6b7280;
+      --white:  #e8ebf0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(17,19,24,.92); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 32px; display: flex; align-items: center; gap: 24px;
+    }
+    .nav-brand { font-weight: 700; font-size: 1.05rem; color: var(--white); text-decoration: none; }
+    nav a { color: var(--dim); text-decoration: none; font-size: .9rem; }
+    nav a:hover { color: var(--white); }
+    .nav-space { flex: 1; }
+    .nav-gh {
+      background: var(--card); color: var(--white); border: 1px solid var(--border);
+      padding: 6px 14px; border-radius: 6px; font-size: .85rem; text-decoration: none;
+    }
+    .nav-gh:hover { background: var(--border); }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 100px 24px 80px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(45,106,255,.12) 0%, transparent 70%);
+    }
+    .badge {
+      display: inline-block; background: rgba(45,106,255,.15);
+      color: #6ea3ff; border: 1px solid rgba(45,106,255,.35);
+      padding: 4px 12px; border-radius: 999px; font-size: .78rem;
+      margin-bottom: 22px; letter-spacing: .04em;
+    }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 800; color: var(--white); line-height: 1.15; }
+    .hero h1 span { color: #6ea3ff; }
+    .hero p {
+      margin: 20px auto 0; max-width: 580px;
+      font-size: 1.1rem; color: var(--dim); line-height: 1.7;
+    }
+
+    .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 40px; }
+    .btn-primary {
+      background: var(--acc); color: #fff; padding: 13px 28px;
+      border-radius: 8px; text-decoration: none; font-weight: 600;
+      font-size: 1rem; transition: background .15s;
+    }
+    .btn-primary:hover { background: var(--acc2); }
+    .btn-secondary {
+      background: var(--card); color: var(--white);
+      border: 1px solid var(--border); padding: 13px 28px;
+      border-radius: 8px; text-decoration: none; font-size: 1rem;
+    }
+    .btn-secondary:hover { background: var(--border); }
+
+    /* SECTIONS */
+    section { padding: 80px 24px; max-width: 1040px; margin: 0 auto; }
+    section h2 { font-size: 1.7rem; font-weight: 700; color: var(--white); margin-bottom: 40px; text-align: center; }
+
+    /* FEATURES */
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+    .feat {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px 22px;
+    }
+    .feat-icon { font-size: 1.6rem; margin-bottom: 12px; }
+    .feat h3 { font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+    .feat p  { font-size: .875rem; color: var(--dim); line-height: 1.55; }
+
+    /* MODELS */
+    .models { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+    .model-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px 20px;
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .model-badge {
+      background: var(--acc2); color: #fff;
+      border-radius: 6px; padding: 4px 9px;
+      font-size: .72rem; font-weight: 700; white-space: nowrap; margin-top: 2px;
+    }
+    .model-badge.best { background: #1a7a45; }
+    .model-info h4 { font-size: .95rem; color: var(--white); margin-bottom: 4px; }
+    .model-info p  { font-size: .82rem; color: var(--dim); }
+
+    /* DOWNLOAD */
+    .dl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+    .dl-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 28px 24px;
+    }
+    .dl-card h3 { font-size: 1.1rem; color: var(--white); margin-bottom: 6px; }
+    .dl-card p  { font-size: .85rem; color: var(--dim); margin-bottom: 18px; }
+    .dl-links { display: flex; flex-direction: column; gap: 8px; }
+    .dl-btn {
+      display: block; background: var(--panel);
+      border: 1px solid var(--border); border-radius: 7px;
+      padding: 9px 14px; color: var(--white);
+      text-decoration: none; font-size: .875rem;
+      transition: background .12s, border-color .12s;
+    }
+    .dl-btn:hover { background: var(--border); border-color: #444; }
+    .dl-btn .dl-ext { color: var(--dim); font-size: .78rem; }
+
+    /* FOOTER */
+    footer {
+      text-align: center; padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--dim); font-size: .875rem;
+    }
+    footer a { color: var(--dim); text-decoration: none; }
+    footer a:hover { color: var(--white); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="#">✂ BG Remover</a>
+  <a href="#features">Features</a>
+  <a href="#models">Models</a>
+  <a href="#download">Download</a>
+  <span class="nav-space"></span>
+  <a class="nav-gh" href="https://github.com/longweekendlabs/bg-remover" target="_blank">GitHub ↗</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge">v1.2.0 · Free &amp; Open Source</div>
+  <h1>Background Removal<br><span>that works offline</span></h1>
+  <p>
+    Drop your character sprites and artwork; get clean transparent PNGs
+    without cloud APIs, subscriptions, or watermarks.
+    Powered by BiRefNet AI — 100% on your machine.
+  </p>
+  <div class="hero-btns">
+    <a class="btn-primary" href="#download">Download Free</a>
+    <a class="btn-secondary" href="https://github.com/longweekendlabs/bg-remover" target="_blank">View on GitHub</a>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <h2>Everything you need. Nothing you don't.</h2>
+  <div class="features">
+    <div class="feat">
+      <div class="feat-icon">📂</div>
+      <h3>Drag &amp; Drop Batch</h3>
+      <p>Drop images or whole folders into the queue. Hundreds of sprites processed while you work.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🤖</div>
+      <h3>6 AI Models</h3>
+      <p>BiRefNet, ISNet, U2Net — switch models per image. Results are cached for instant comparison.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🔌</div>
+      <h3>100% Offline</h3>
+      <p>No API keys. No subscriptions. No uploads. Models download once, then stay on your machine.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">👁️</div>
+      <h3>Before / After Preview</h3>
+      <p>Side-by-side view with checkerboard transparency. Compare multiple model results instantly.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">⚡</div>
+      <h3>Single Image Preview</h3>
+      <p>Test any model on one image before committing the whole batch. Fast iteration.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🖤</div>
+      <h3>Dark UI</h3>
+      <p>A clean dark interface that's easy on the eyes during long sessions. Respects OS theme on Windows.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🔄</div>
+      <h3>Retry &amp; Resume</h3>
+      <p>Failed files are flagged with the error. Retry individually or reset all with one click.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🐧🪟</div>
+      <h3>Linux &amp; Windows</h3>
+      <p>Native packages for Fedora, Ubuntu, AppImage, and Windows. Built for KDE Plasma Wayland.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MODELS -->
+<section id="models">
+  <h2>Choose your AI model</h2>
+  <div class="models">
+    <div class="model-card">
+      <div class="model-badge best">★ Best</div>
+      <div class="model-info">
+        <h4>BiRefNet Portrait</h4>
+        <p>Optimised for character sprites and portraits. Highest quality edges. ~175 MB download.</p>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="model-badge">Quality</div>
+      <div class="model-info">
+        <h4>BiRefNet General</h4>
+        <p>High quality general-purpose removal. Great starting point for any subject. ~175 MB.</p>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="model-badge">Detail</div>
+      <div class="model-info">
+        <h4>ISNet</h4>
+        <p>Preserves fine detail and complex edges. Good for hair and fur. ~100 MB.</p>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="model-badge">Fast</div>
+      <div class="model-info">
+        <h4>U2Net Human</h4>
+        <p>Tuned for human figures. Fast and reliable for full-body sprites. ~176 MB.</p>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="model-badge">Fast</div>
+      <div class="model-info">
+        <h4>U2Net</h4>
+        <p>General purpose with fast inference. Good fallback for mixed batches. ~176 MB.</p>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="model-badge">Fastest</div>
+      <div class="model-info">
+        <h4>Silueta</h4>
+        <p>Fastest model, smallest download. Ideal for simple, clean subjects. ~43 MB.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<section id="download">
+  <h2>Download</h2>
+  <div class="dl-grid">
+
+    <div class="dl-card">
+      <h3>🐧 Linux</h3>
+      <p>Universal AppImage runs on any distribution. RPM and DEB for native installs.</p>
+      <div class="dl-links" id="dl-linux">
+        <a class="dl-btn" href="https://github.com/longweekendlabs/bg-remover/releases/latest">
+          Loading… <span class="dl-ext">.AppImage / .rpm / .deb</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="dl-card">
+      <h3>🪟 Windows</h3>
+      <p>Installer adds BG Remover to your Start Menu. Portable ZIP — no install needed.</p>
+      <div class="dl-links" id="dl-windows">
+        <a class="dl-btn" href="https://github.com/longweekendlabs/bg-remover/releases/latest">
+          Loading… <span class="dl-ext">-Setup.exe / -portable.zip</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="dl-card">
+      <h3>📦 Source</h3>
+      <p>Run directly from source. Python 3 + PyQt6 + rembg required.</p>
+      <div class="dl-links">
+        <a class="dl-btn" href="https://github.com/longweekendlabs/bg-remover" target="_blank">
+          View on GitHub <span class="dl-ext">git clone</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <p>Made with ♥ by <a href="https://github.com/longweekendlabs" target="_blank">Long Weekend Labs</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/longweekendlabs/bg-remover" target="_blank">GitHub</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/longweekendlabs/bg-remover/releases" target="_blank">Releases</a>
+  </p>
+</footer>
+
+<script>
+// Populate download buttons from GitHub Releases API
+fetch("https://api.github.com/repos/longweekendlabs/bg-remover/releases/latest")
+  .then(r => r.json())
+  .then(data => {
+    const assets = data.assets || [];
+    const tag    = data.tag_name || "";
+
+    function makeBtn(asset) {
+      const ext = asset.name.split(".").pop().toLowerCase();
+      const extMap = { appimage:"AppImage", rpm:"RPM", deb:"DEB", gz:"tar.gz", zip:"Portable ZIP", exe:"Installer" };
+      const a = document.createElement("a");
+      a.className = "dl-btn";
+      a.href = asset.browser_download_url;
+      const mb = (asset.size / 1024 / 1024).toFixed(0);
+      a.innerHTML = `${asset.name} <span class="dl-ext">${mb} MB</span>`;
+      return a;
+    }
+
+    // Linux
+    const linAssets = assets.filter(a =>
+      a.name.endsWith(".AppImage") || a.name.endsWith(".rpm") ||
+      a.name.endsWith(".deb")      || a.name.endsWith(".tar.gz")
+    );
+    if (linAssets.length) {
+      const el = document.getElementById("dl-linux");
+      el.innerHTML = "";
+      linAssets.forEach(a => el.appendChild(makeBtn(a)));
+    }
+
+    // Windows
+    const winAssets = assets.filter(a =>
+      a.name.endsWith("-Setup.exe") || a.name.endsWith("-portable.zip")
+    );
+    if (winAssets.length) {
+      const el = document.getElementById("dl-windows");
+      el.innerHTML = "";
+      winAssets.forEach(a => el.appendChild(makeBtn(a)));
+    }
+
+    // Update badge version
+    if (tag) {
+      document.querySelector(".badge").textContent = `${tag} · Free & Open Source`;
+    }
+  })
+  .catch(() => {
+    // API unavailable — keep the static fallback links
+  });
+</script>
+
+</body>
+</html>

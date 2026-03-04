@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+.venv/
+.build_venv/
+env/
+
+# Build outputs
+build/
+dist/
+lin/
+win/
+Output/
+*.spec.bak
+
+# PyInstaller
+*.manifest
+
+# Tools cache
+.build_tools/
+
+# AI model cache (these are downloaded on first run, not committed)
+.u2net/
+
+# App cache (deleted on exit, but just in case)
+bg_remover_app/.cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
