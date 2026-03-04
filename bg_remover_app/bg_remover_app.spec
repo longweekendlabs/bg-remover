@@ -6,11 +6,13 @@ from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 block_cipher = None
 
-# rembg ships model data that must be bundled.
+# rembg → pymatting → scipy (required, must be bundled explicitly)
 # Do NOT use collect_submodules("onnxruntime") — it crashes on Windows during
 # PyInstaller analysis. The pyinstaller-hooks-contrib hook handles it correctly.
-rembg_datas   = collect_data_files("rembg")
-rembg_hidden  = collect_submodules("rembg")
+rembg_datas    = collect_data_files("rembg")
+rembg_hidden   = collect_submodules("rembg")
+scipy_datas    = collect_data_files("scipy")
+scipy_hidden   = collect_submodules("scipy")
 
 a = Analysis(
     ["main.py"],
@@ -19,14 +21,14 @@ a = Analysis(
     datas=[
         ("icons/icon.png",  "icons"),
         ("icons/icon.ico",  "icons"),
-    ] + rembg_datas,
-    hiddenimports=rembg_hidden + [
+    ] + rembg_datas + scipy_datas,
+    hiddenimports=rembg_hidden + scipy_hidden + [
         "PIL._tkinter_finder",
     ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=["tkinter", "matplotlib", "scipy", "notebook"],
+    excludes=["tkinter", "matplotlib", "notebook"],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
