@@ -21,7 +21,6 @@ a = Analysis(
     ] + rembg_datas + onnx_datas,
     hiddenimports=hiddenimports + [
         "PIL._tkinter_finder",
-        "pkg_resources.py2_warn",
     ],
     hookspath=[],
     hooksconfig={},

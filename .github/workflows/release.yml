@@ -31,63 +31,72 @@ jobs:
         working-directory: bg_remover_app
         run: pip install pyinstaller PyQt6 Pillow "rembg[cpu]"
 
-      - name: Build Linux packages
+      - name: PyInstaller build
         working-directory: bg_remover_app
         run: |
-          VERSION=$(python -c "from version import __version__; print(__version__)")
-          APP_NAME="BGRemover"
-          PKG_NAME="bg-remover"
-          mkdir -p lin .build_tools
-
-          # PyInstaller
           pyinstaller bg_remover_app.spec --clean --noconfirm \
               --distpath dist --workpath build
 
-          BINARY="dist/${APP_NAME}"
+      - name: Package tar.gz
+        working-directory: bg_remover_app
+        run: |
+          VERSION=$(python -c "from version import __version__; print(__version__)")
+          mkdir -p lin
+          tar czf "lin/BGRemover-v${VERSION}-linux.tar.gz" -C dist BGRemover
 
-          # tar.gz
-          tar czf "lin/${APP_NAME}-v${VERSION}-linux.tar.gz" -C dist "${APP_NAME}"
+      - name: Package AppImage
+        working-directory: bg_remover_app
+        run: |
+          VERSION=$(python -c "from version import __version__; print(__version__)")
+          mkdir -p lin .build_tools
 
-          # AppImage
           curl -sSL -o .build_tools/appimagetool \
               https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x .build_tools/appimagetool
 
-          APPDIR="build/${APP_NAME}.AppDir"
+          APPDIR="build/BGRemover.AppDir"
           mkdir -p "${APPDIR}/usr/bin" "${APPDIR}/usr/share/icons/hicolor/256x256/apps"
-          cp "$BINARY" "${APPDIR}/usr/bin/${APP_NAME}"
-          cp icons/icon.png "${APPDIR}/usr/share/icons/hicolor/256x256/apps/${PKG_NAME}.png"
-          cp icons/icon.png "${APPDIR}/${PKG_NAME}.png"
-          cat > "${APPDIR}/${APP_NAME}.desktop" <<DESKTOP
+          cp dist/BGRemover "${APPDIR}/usr/bin/BGRemover"
+          cp icons/icon.png "${APPDIR}/usr/share/icons/hicolor/256x256/apps/bg-remover.png"
+          cp icons/icon.png "${APPDIR}/bg-remover.png"
+
+          cat > "${APPDIR}/BGRemover.desktop" <<'DESKTOP'
           [Desktop Entry]
           Name=BG Remover
-          Exec=${APP_NAME}
-          Icon=${PKG_NAME}
+          Exec=BGRemover
+          Icon=bg-remover
           Type=Application
           Categories=Graphics;
           DESKTOP
+
           cat > "${APPDIR}/AppRun" <<'APPRUN'
           #!/bin/bash
           HERE="$(dirname "$(readlink -f "$0")")"
           exec "$HERE/usr/bin/BGRemover" "$@"
           APPRUN
           chmod +x "${APPDIR}/AppRun"
-          APPIMAGE_EXTRACT_AND_RUN=1 .build_tools/appimagetool \
-              "${APPDIR}" "lin/${APP_NAME}-v${VERSION}-x86_64.AppImage"
-          chmod +x "lin/${APP_NAME}-v${VERSION}-x86_64.AppImage"
 
-          # RPM
-          RPM_STAGE="dist/_rpm_stage/${APP_NAME}-${VERSION}"
+          APPIMAGE_EXTRACT_AND_RUN=1 .build_tools/appimagetool \
+              "${APPDIR}" "lin/BGRemover-v${VERSION}-x86_64.AppImage"
+          chmod +x "lin/BGRemover-v${VERSION}-x86_64.AppImage"
+
+      - name: Package RPM
+        working-directory: bg_remover_app
+        run: |
+          VERSION=$(python -c "from version import __version__; print(__version__)")
+
+          RPM_STAGE="dist/_rpm_stage/BGRemover-${VERSION}"
           mkdir -p "${RPM_STAGE}/usr/bin" \
                     "${RPM_STAGE}/usr/share/applications" \
                     "${RPM_STAGE}/usr/share/icons/hicolor/256x256/apps"
-          cp "$BINARY" "${RPM_STAGE}/usr/bin/${APP_NAME}"
-          cp icons/icon.png "${RPM_STAGE}/usr/share/icons/hicolor/256x256/apps/${PKG_NAME}.png"
-          cat > "${RPM_STAGE}/usr/share/applications/${PKG_NAME}.desktop" <<DESKTOP
+          cp dist/BGRemover "${RPM_STAGE}/usr/bin/BGRemover"
+          cp icons/icon.png "${RPM_STAGE}/usr/share/icons/hicolor/256x256/apps/bg-remover.png"
+
+          cat > "${RPM_STAGE}/usr/share/applications/bg-remover.desktop" <<'DESKTOP'
           [Desktop Entry]
           Name=BG Remover
-          Exec=${APP_NAME}
-          Icon=${PKG_NAME}
+          Exec=BGRemover
+          Icon=bg-remover
           Type=Application
           Categories=Graphics;
           DESKTOP
@@ -95,56 +104,73 @@ jobs:
           RPM_LINK="/tmp/bgr_rpm_stage_$$"
           ln -sfn "$(realpath dist/_rpm_stage)" "$RPM_LINK"
 
-          rpmbuild -bb \
-            --define "_topdir ${RPM_LINK}/rpmbuild" \
-            --define "_app_src ${RPM_LINK}/${APP_NAME}-${VERSION}" \
-            --define "__strip /bin/true" \
-            - <<SPECFILE
-          Name:       ${PKG_NAME}
+          SPEC_FILE="/tmp/bg_remover_${VERSION}.spec"
+          cat > "$SPEC_FILE" <<SPECEOF
+          Name:       bg-remover
           Version:    ${VERSION}
-          Release:    1%{?dist}
+          Release:    1
           Summary:    AI-powered batch background removal
           License:    MIT
           BuildArch:  x86_64
+
           %description
-          Drop your sprites; get clean transparent PNGs.
+          Drop your sprites; get clean transparent PNGs without cloud APIs.
+          Powered by rembg, BiRefNet, ISNet, and U2Net. 100%% offline.
+
           %install
           cp -a %{_app_src}/. %{buildroot}/
+
           %files
-          /usr/bin/${APP_NAME}
-          /usr/share/applications/${PKG_NAME}.desktop
-          /usr/share/icons/hicolor/256x256/apps/${PKG_NAME}.png
+          /usr/bin/BGRemover
+          /usr/share/applications/bg-remover.desktop
+          /usr/share/icons/hicolor/256x256/apps/bg-remover.png
+
           %changelog
           * $(date "+%a %b %d %Y") Long Weekend Labs <longweekendlabs@users.noreply.github.com> - ${VERSION}-1
-          - v${VERSION}
-          SPECFILE
-          find "${RPM_LINK}/rpmbuild/RPMS" -name "*.rpm" -exec cp {} "lin/${PKG_NAME}-${VERSION}-1.x86_64.rpm" \;
+          - v${VERSION} release
+          SPECEOF
+
+          rpmbuild -bb \
+            --define "_topdir ${RPM_LINK}/rpmbuild" \
+            --define "_app_src ${RPM_LINK}/BGRemover-${VERSION}" \
+            --define "__strip /bin/true" \
+            "$SPEC_FILE"
+
+          find "${RPM_LINK}/rpmbuild/RPMS" -name "*.rpm" \
+            -exec cp {} "lin/bg-remover-${VERSION}-1.x86_64.rpm" \;
           rm -f "$RPM_LINK"
 
-          # DEB (manual ar method — no dpkg-deb needed on Ubuntu CI)
+      - name: Package DEB
+        working-directory: bg_remover_app
+        run: |
+          VERSION=$(python -c "from version import __version__; print(__version__)")
+
           DEB_TMP="build/deb_stage"
           mkdir -p "${DEB_TMP}/DEBIAN" \
                     "${DEB_TMP}/usr/bin" \
                     "${DEB_TMP}/usr/share/applications" \
                     "${DEB_TMP}/usr/share/icons/hicolor/256x256/apps"
-          cp "$BINARY" "${DEB_TMP}/usr/bin/${APP_NAME}"
-          cp icons/icon.png "${DEB_TMP}/usr/share/icons/hicolor/256x256/apps/${PKG_NAME}.png"
-          cat > "${DEB_TMP}/usr/share/applications/${PKG_NAME}.desktop" <<DESKTOP
+          cp dist/BGRemover "${DEB_TMP}/usr/bin/BGRemover"
+          cp icons/icon.png "${DEB_TMP}/usr/share/icons/hicolor/256x256/apps/bg-remover.png"
+
+          cat > "${DEB_TMP}/usr/share/applications/bg-remover.desktop" <<'DESKTOP'
           [Desktop Entry]
           Name=BG Remover
-          Exec=${APP_NAME}
-          Icon=${PKG_NAME}
+          Exec=BGRemover
+          Icon=bg-remover
           Type=Application
           Categories=Graphics;
           DESKTOP
+
           cat > "${DEB_TMP}/DEBIAN/control" <<CTRL
-          Package: ${PKG_NAME}
+          Package: bg-remover
           Version: ${VERSION}
           Architecture: amd64
           Maintainer: Long Weekend Labs <longweekendlabs@users.noreply.github.com>
           Description: AI-powered batch background removal
           CTRL
-          dpkg-deb --build "${DEB_TMP}" "lin/${PKG_NAME}_${VERSION}_amd64.deb"
+
+          dpkg-deb --build "${DEB_TMP}" "lin/bg-remover_${VERSION}_amd64.deb"
 
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4
@@ -182,7 +208,7 @@ jobs:
           powershell -Command "Compress-Archive -Path 'dist\BGRemover.exe' -DestinationPath 'win\BGRemover-v%VERSION%-win64-portable.zip'"
           "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=%VERSION% installer.iss
 
-      - name: Move installer to workspace root
+      - name: Move installer to win folder
         working-directory: bg_remover_app
         shell: powershell
         run: |
@@ -244,5 +270,5 @@ jobs:
             | Windows portable | `-portable.zip` |
 
             ### First run
-            On first launch, select an AI model and click **Preview Selected** or **Start Processing**.
-            The model will download once (~175 MB for BiRefNet) — after that the app works fully offline.
+            On first launch, click **Preview Selected** or **Start Processing**.
+            The AI model downloads once (~175 MB) then works fully offline.
