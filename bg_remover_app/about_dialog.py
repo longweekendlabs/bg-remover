@@ -1,140 +1,135 @@
 """
-about_dialog.py — About dialog with Long Weekend Labs branding.
+about_dialog.py — About dialog, styled to match Speech Bubble Generator v2.
 """
 
-from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-)
-from PyQt6.QtCore import Qt, QUrl
-from PyQt6.QtGui import QDesktopServices, QPixmap, QFont
+import os
+import sys
+import subprocess
+import webbrowser
 
-from version import __version__, __app_name__
+from PyQt6.QtWidgets import (
+    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QFrame,
+)
+from PyQt6.QtGui import QPixmap, QFont
+from PyQt6.QtCore import Qt
+
+from version import __version__, __app_name__, __org_name__, __copyright__
+
+_GITHUB_URL = "https://github.com/longweekendlabs/bg-remover"
+
+
+def _resource_path(relative: str) -> str:
+    """Resolve path both from source and inside a PyInstaller bundle."""
+    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, relative)
+
+
+def _open_url(url: str):
+    """Open URL in system browser with multiple fallbacks."""
+    try:
+        from PyQt6.QtCore import QUrl
+        from PyQt6.QtGui import QDesktopServices
+        if QDesktopServices.openUrl(QUrl(url)):
+            return
+    except Exception:
+        pass
+    try:
+        webbrowser.open(url)
+        return
+    except Exception:
+        pass
+    try:
+        if sys.platform == "win32":
+            subprocess.Popen(["start", url], shell=True)
+        elif sys.platform == "darwin":
+            subprocess.Popen(["open", url])
+        else:
+            subprocess.Popen(["xdg-open", url])
+    except Exception:
+        pass
 
 
 class AboutDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle(f"About {__app_name__}")
-        self.setFixedSize(460, 340)
+        self.setFixedWidth(440)
         self.setModal(True)
-        self.setStyleSheet("""
-            QDialog {
-                background: #1e1e1e;
-            }
-            QLabel {
-                color: #ccc;
-                background: transparent;
-            }
-            QPushButton {
-                background: #3c3f41; color: #ccc;
-                border: 1px solid #555; padding: 5px 16px;
-                border-radius: 4px; font-size: 12px;
-            }
-            QPushButton:hover { background: #4c5052; }
-        """)
-        self._build_ui()
+        self._build()
 
-    def _build_ui(self):
+    def _build(self):
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(28, 24, 28, 20)
-        layout.setSpacing(0)
+        layout.setContentsMargins(24, 24, 24, 20)
+        layout.setSpacing(12)
 
-        # ── Logo / branding row ──────────────────────────────────────────────
-        brand_row = QHBoxLayout()
-        brand_row.setSpacing(14)
+        # ── Logo ─────────────────────────────────────────────────────────────
+        logo_path = _resource_path(os.path.join("icons", "LongWeekendLabs.logo.jpg"))
+        if os.path.exists(logo_path):
+            logo_pm = QPixmap(logo_path).scaledToWidth(
+                200, Qt.TransformationMode.SmoothTransformation
+            )
+            logo_lbl = QLabel()
+            logo_lbl.setPixmap(logo_pm)
+            logo_lbl.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+            layout.addWidget(logo_lbl)
 
-        # Coloured square stand-in for logo
-        logo_lbl = QLabel()
-        logo_lbl.setFixedSize(52, 52)
-        logo_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        logo_lbl.setStyleSheet(
-            "background: qlineargradient(x1:0,y1:0,x2:1,y2:1,"
-            "stop:0 #1e4a6b, stop:1 #2d6a9f);"
-            "border-radius: 10px; color: #fff; font-size: 22px;"
-        )
-        logo_lbl.setText("✂")
+        # ── App name ─────────────────────────────────────────────────────────
+        name_lbl = QLabel(__app_name__)
+        f = QFont()
+        f.setPointSize(18)
+        f.setBold(True)
+        name_lbl.setFont(f)
+        name_lbl.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        layout.addWidget(name_lbl)
 
-        brand_col = QVBoxLayout()
-        brand_col.setSpacing(2)
-
-        app_name_lbl = QLabel(__app_name__)
-        app_name_lbl.setFont(QFont("", 18, QFont.Weight.Bold))
-        app_name_lbl.setStyleSheet("color: #e0e0e0;")
-
+        # ── Version ───────────────────────────────────────────────────────────
         ver_lbl = QLabel(f"Version {__version__}")
-        ver_lbl.setStyleSheet("color: #666; font-size: 12px;")
+        f2 = QFont()
+        f2.setPointSize(11)
+        ver_lbl.setFont(f2)
+        ver_lbl.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        ver_lbl.setStyleSheet("color: #888;")
+        layout.addWidget(ver_lbl)
 
-        brand_col.addWidget(app_name_lbl)
-        brand_col.addWidget(ver_lbl)
-        brand_col.addStretch()
+        # ── Org / copyright ───────────────────────────────────────────────────
+        org_lbl = QLabel(f"{__org_name__}\n{__copyright__}")
+        org_lbl.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        org_lbl.setStyleSheet("color: #aaa; font-size: 11px;")
+        layout.addWidget(org_lbl)
 
-        brand_row.addWidget(logo_lbl)
-        brand_row.addLayout(brand_col)
-        brand_row.addStretch()
-        layout.addLayout(brand_row)
+        # ── Divider ───────────────────────────────────────────────────────────
+        line = QFrame()
+        line.setFrameShape(QFrame.Shape.HLine)
+        line.setFrameShadow(QFrame.Shadow.Sunken)
+        layout.addWidget(line)
 
-        layout.addSpacing(18)
-
-        # ── Description ──────────────────────────────────────────────────────
-        desc = QLabel(
-            "AI-powered batch background removal — <b>100% offline</b>.<br>"
-            "Drop your sprites and character art; get clean transparent PNGs<br>"
-            "without cloud APIs, subscriptions, or watermarks."
+        # ── Description ───────────────────────────────────────────────────────
+        desc_lbl = QLabel(
+            "AI-powered batch background removal — 100% offline.\n"
+            "Drop your sprites and art; get clean transparent PNGs\n"
+            "without cloud APIs, subscriptions, or watermarks.\n\n"
+            "Built with: Python · PyQt6 · rembg · BiRefNet · ISNet · U²Net"
         )
-        desc.setWordWrap(True)
-        desc.setStyleSheet("color: #aaa; font-size: 12px; line-height: 1.5;")
-        desc.setTextFormat(Qt.TextFormat.RichText)
-        layout.addWidget(desc)
+        desc_lbl.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        desc_lbl.setStyleSheet("color: #999; font-size: 10px;")
+        desc_lbl.setWordWrap(True)
+        layout.addWidget(desc_lbl)
 
-        layout.addSpacing(16)
-
-        # ── Powered-by row ───────────────────────────────────────────────────
-        powered = QLabel(
-            "Powered by <b>rembg</b> · BiRefNet · ISNet · U²Net"
-        )
-        powered.setStyleSheet("color: #666; font-size: 11px;")
-        powered.setTextFormat(Qt.TextFormat.RichText)
-        layout.addWidget(powered)
-
-        layout.addSpacing(20)
-
-        # ── Divider ──────────────────────────────────────────────────────────
-        div = QLabel()
-        div.setFixedHeight(1)
-        div.setStyleSheet("background: #333;")
-        layout.addWidget(div)
-
-        layout.addSpacing(14)
-
-        # ── Bottom row: org + buttons ─────────────────────────────────────────
-        bottom = QHBoxLayout()
-        bottom.setSpacing(8)
-
-        org_lbl = QLabel("© 2025 Long Weekend Labs")
-        org_lbl.setStyleSheet("color: #555; font-size: 11px;")
-        bottom.addWidget(org_lbl)
-        bottom.addStretch()
+        # ── Buttons ───────────────────────────────────────────────────────────
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
 
         btn_gh = QPushButton("GitHub")
-        btn_gh.setToolTip("Open the project page on GitHub")
-        btn_gh.clicked.connect(
-            lambda: QDesktopServices.openUrl(
-                QUrl("https://github.com/longweekendlabs/bg-remover")
-            )
-        )
+        btn_gh.setToolTip(_GITHUB_URL)
+        btn_gh.setFixedWidth(90)
+        btn_gh.clicked.connect(lambda: _open_url(_GITHUB_URL))
+        btn_row.addWidget(btn_gh)
 
-        btn_ok = QPushButton("Close")
-        btn_ok.setDefault(True)
-        btn_ok.clicked.connect(self.accept)
-        btn_ok.setStyleSheet("""
-            QPushButton {
-                background: #2d5a9f; color: #fff;
-                border: 1px solid #4a7abf; padding: 5px 16px;
-                border-radius: 4px; font-size: 12px;
-            }
-            QPushButton:hover { background: #3a6ab0; }
-        """)
+        btn_close = QPushButton("Close")
+        btn_close.setFixedWidth(90)
+        btn_close.setDefault(True)
+        btn_close.clicked.connect(self.accept)
+        btn_row.addWidget(btn_close)
 
-        bottom.addWidget(btn_gh)
-        bottom.addWidget(btn_ok)
-        layout.addLayout(bottom)
+        btn_row.addStretch()
+        layout.addLayout(btn_row)

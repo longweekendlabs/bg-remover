@@ -15,10 +15,12 @@ class ProcessorThread(QThread):
     main thread via Qt's cross-thread signal mechanism.
     """
 
-    item_started = pyqtSignal(int)        # queue_index
-    item_done = pyqtSignal(int, str)      # queue_index, output_path
-    item_failed = pyqtSignal(int, str)    # queue_index, error_message
-    all_done = pyqtSignal(int, int)       # succeeded_count, failed_count
+    model_loading = pyqtSignal(str, int)   # model_name, size_mb (download starting)
+    model_ready   = pyqtSignal(str)        # model_name (session created, ready to process)
+    item_started  = pyqtSignal(int)        # queue_index
+    item_done     = pyqtSignal(int, str)   # queue_index, output_path
+    item_failed   = pyqtSignal(int, str)   # queue_index, error_message
+    all_done      = pyqtSignal(int, int)   # succeeded_count, failed_count
 
     def __init__(self, items, model_name, output_folder, overwrite, parent=None):
         """
@@ -40,6 +42,12 @@ class ProcessorThread(QThread):
 
     def run(self):
         from rembg import remove, new_session
+        from settings import MODEL_SIZES_MB
+
+        # Signal that we're about to load/download the model.
+        # The UI will show an indeterminate progress bar during this phase.
+        size_mb = MODEL_SIZES_MB.get(self.model_name, 150)
+        self.model_loading.emit(self.model_name, size_mb)
 
         # Create session once and reuse across the batch for performance.
         # On first run, this triggers the model download (~170 MB).
@@ -50,6 +58,8 @@ class ProcessorThread(QThread):
                 self.item_failed.emit(queue_idx, f"Failed to load model: {exc}")
             self.all_done.emit(0, len(self.items))
             return
+
+        self.model_ready.emit(self.model_name)
 
         succeeded = 0
         failed = 0

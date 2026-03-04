@@ -2,26 +2,31 @@
 """PyInstaller spec for BG Remover — single-file binary for Linux and Windows."""
 
 import sys, os
-from PyInstaller.utils.hooks import collect_data_files, collect_submodules
+from PyInstaller.utils.hooks import collect_data_files, collect_submodules, copy_metadata
 
 block_cipher = None
 
-# rembg → pymatting → scipy (required, must be bundled explicitly)
-# Do NOT use collect_submodules("onnxruntime") — it crashes on Windows during
-# PyInstaller analysis. The pyinstaller-hooks-contrib hook handles it correctly.
-rembg_datas    = collect_data_files("rembg")
-rembg_hidden   = collect_submodules("rembg")
-scipy_datas    = collect_data_files("scipy")
-scipy_hidden   = collect_submodules("scipy")
+# rembg → pymatting calls importlib.metadata.version() — must bundle dist-info.
+# Do NOT use collect_submodules("onnxruntime") — crashes Windows PyInstaller analysis.
+# The pyinstaller-hooks-contrib hook handles onnxruntime correctly.
+rembg_datas   = collect_data_files("rembg")
+rembg_hidden  = collect_submodules("rembg")
+scipy_datas   = collect_data_files("scipy")
+scipy_hidden  = collect_submodules("scipy")
+meta_datas    = (
+    copy_metadata("pymatting") +
+    copy_metadata("rembg")
+)
 
 a = Analysis(
     ["main.py"],
     pathex=["."],
     binaries=[],
     datas=[
-        ("icons/icon.png",  "icons"),
-        ("icons/icon.ico",  "icons"),
-    ] + rembg_datas + scipy_datas,
+        ("icons/icon.png",                 "icons"),
+        ("icons/icon.ico",                 "icons"),
+        ("icons/LongWeekendLabs.logo.jpg", "icons"),
+    ] + rembg_datas + scipy_datas + meta_datas,
     hiddenimports=rembg_hidden + scipy_hidden + [
         "PIL._tkinter_finder",
     ],

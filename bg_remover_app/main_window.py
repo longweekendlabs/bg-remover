@@ -20,6 +20,7 @@ from processor import ProcessorThread
 from version import __version__, __app_name__
 from settings import MODELS, MODEL_LABELS, MODEL_SIZES_MB, DEFAULT_MODEL, SUPPORTED_EXTENSIONS
 from about_dialog import AboutDialog
+from model_download_dialog import ModelDownloadDialog
 
 
 # ── App-local cache (deleted on exit) ────────────────────────────────────────
@@ -380,20 +381,11 @@ class MainWindow(QMainWindow):
         """Return True if the model is already cached or the user confirms the download."""
         if self._is_model_cached(model_id):
             return True
-        size_mb = MODEL_SIZES_MB.get(model_id, 150)
-        label   = MODEL_LABELS.get(model_id, model_id)
-        reply   = QMessageBox.question(
-            self,
-            "Model Download Required",
-            f"<b>{label}</b> has not been downloaded yet.<br><br>"
-            f"&nbsp;&nbsp;Download size : <b>~{size_mb} MB</b><br>"
-            f"&nbsp;&nbsp;Saved to&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <tt>~/.u2net/{model_id}.onnx</tt><br><br>"
-            "This is a one-time download per model — the app works fully offline afterwards.<br>"
-            "An internet connection is required. Continue?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.Yes,
-        )
-        return reply == QMessageBox.StandardButton.Yes
+        size_mb     = MODEL_SIZES_MB.get(model_id, 150)
+        label       = MODEL_LABELS.get(model_id, model_id)
+        description = MODELS.get(model_id, "AI background removal model")
+        dlg = ModelDownloadDialog(model_id, label, description, size_mb, self)
+        return dlg.exec() == ModelDownloadDialog.DialogCode.Accepted
 
     # ── Model toggle ─────────────────────────────────────────────────────────
 
@@ -489,10 +481,12 @@ class MainWindow(QMainWindow):
             output_folder = self._output_folder,
             overwrite     = overwrite,
         )
-        self._processor_thread.item_started.connect(self._on_item_started)
-        self._processor_thread.item_done   .connect(self._on_item_done)
-        self._processor_thread.item_failed .connect(self._on_item_failed)
-        self._processor_thread.all_done    .connect(self._on_all_done)
+        self._processor_thread.model_loading.connect(self._on_model_loading)
+        self._processor_thread.model_ready  .connect(self._on_model_ready)
+        self._processor_thread.item_started .connect(self._on_item_started)
+        self._processor_thread.item_done    .connect(self._on_item_done)
+        self._processor_thread.item_failed  .connect(self._on_item_failed)
+        self._processor_thread.all_done     .connect(self._on_all_done)
         self._processor_thread.start()
 
     def _stop_processing(self):
@@ -503,6 +497,31 @@ class MainWindow(QMainWindow):
         self.progress_label.setText("Stopping…")
 
     # ── Batch signal handlers ────────────────────────────────────────────────
+
+    def _on_model_loading(self, model_name: str, size_mb: int):
+        """Show indeterminate progress while the model is downloading / loading."""
+        from settings import MODEL_LABELS
+        label = MODEL_LABELS.get(model_name, model_name)
+        self.progress_bar.setRange(0, 0)        # indeterminate spinner
+        self.progress_bar.setFormat("")
+        u2net_home = os.environ.get(
+            "U2NET_HOME", os.path.join(os.path.expanduser("~"), ".u2net")
+        )
+        cached = os.path.exists(os.path.join(u2net_home, f"{model_name}.onnx"))
+        if cached:
+            self.progress_label.setText(f"Loading  {label}…")
+        else:
+            self.progress_label.setText(f"Downloading  {label}  (~{size_mb} MB)…")
+
+    def _on_model_ready(self, model_name: str):
+        """Restore determinate progress bar once the model session is ready."""
+        if self._previewing:
+            self.progress_bar.setRange(0, 1)
+            self.progress_bar.setValue(0)
+        else:
+            self.progress_bar.setRange(0, self._total if self._total else 1)
+            self.progress_bar.setValue(0)
+            self.progress_label.setText(f"0 / {self._total}")
 
     def _on_item_started(self, queue_idx: int):
         self.queue_panel.update_item_status(queue_idx, "Processing")
@@ -589,9 +608,11 @@ class MainWindow(QMainWindow):
             output_folder = _CACHE_DIR,   # preview results go to local cache
             overwrite     = True,
         )
-        self._preview_thread.item_done  .connect(self._on_preview_done)
-        self._preview_thread.item_failed.connect(self._on_preview_failed)
-        self._preview_thread.all_done   .connect(self._on_preview_all_done)
+        self._preview_thread.model_loading.connect(self._on_model_loading)
+        self._preview_thread.model_ready  .connect(self._on_model_ready)
+        self._preview_thread.item_done    .connect(self._on_preview_done)
+        self._preview_thread.item_failed  .connect(self._on_preview_failed)
+        self._preview_thread.all_done     .connect(self._on_preview_all_done)
         self._preview_thread.start()
 
     def _on_preview_done(self, queue_idx: int, output_path: str):

@@ -9,7 +9,12 @@ History:
             tooltips on every control; Windows OS dark/light theme detection
   v1.2.1 — Fix: bundle scipy (rembg → pymatting → scipy); was excluded from
             PyInstaller build causing crash on first processing job
+  v1.2.2 — About dialog matches SBG v2 style (logo centred at top); custom
+            model-download permission dialog with size/description; GitHub Pages
+            portfolio; bundle pymatting dist-info (importlib.metadata crash fix)
 """
 
-__version__  = "1.2.1"
-__app_name__ = "BG Remover"
+__version__   = "1.2.2"
+__app_name__  = "BG Remover"
+__org_name__  = "Long Weekend Labs"
+__copyright__ = "© 2026 Long Weekend Labs"

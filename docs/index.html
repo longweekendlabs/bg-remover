@@ -123,6 +123,30 @@
     .dl-btn:hover { background: var(--border); border-color: #444; }
     .dl-btn .dl-ext { color: var(--dim); font-size: .78rem; }
 
+    /* MORE FROM LONG WEEKEND LABS */
+    .more-section {
+      max-width: 700px; margin: 0 auto; padding: 40px 24px 20px; text-align: center;
+    }
+    .more-section h2 {
+      font-size: 1rem; color: var(--dim); font-weight: 600;
+      text-transform: uppercase; letter-spacing: .08em; margin-bottom: 18px;
+    }
+    .more-card {
+      display: flex; align-items: center; gap: 20px; text-align: left;
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 22px 24px; text-decoration: none;
+      transition: border-color .2s, transform .15s;
+    }
+    .more-card:hover { border-color: #2d6aff66; transform: translateY(-2px); }
+    .more-icon { font-size: 2rem; flex-shrink: 0; }
+    .more-info { flex: 1; }
+    .more-info h3 { font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+    .more-info p  { font-size: .85rem; color: var(--dim); line-height: 1.5; }
+    .btn-more {
+      background: var(--panel); color: var(--white); border: 1px solid var(--border);
+      padding: 8px 18px; border-radius: 7px; font-size: .85rem; white-space: nowrap; flex-shrink: 0;
+    }
+
     /* FOOTER */
     footer {
       text-align: center; padding: 40px 24px;
@@ -293,6 +317,19 @@
 
   </div>
 </section>
+
+<!-- MORE FROM LONG WEEKEND LABS -->
+<div class="more-section">
+  <h2>More from Long Weekend Labs</h2>
+  <a class="more-card" href="https://longweekendlabs.github.io/speech-bubble-editor/" target="_blank">
+    <div class="more-icon">💬</div>
+    <div class="more-info">
+      <h3>Speech Bubble Editor</h3>
+      <p>Add speech bubbles and captions to photos and videos. 5 bubble styles, video trim/cut/reverse, meme mode, and full-resolution export. Free for Linux &amp; Windows.</p>
+    </div>
+    <span class="btn-more">Learn more →</span>
+  </a>
+</div>
 
 <footer>
   <p>Made with ♥ by <a href="https://github.com/longweekendlabs" target="_blank">Long Weekend Labs</a>

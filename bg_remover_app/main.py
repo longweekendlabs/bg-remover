@@ -2,6 +2,7 @@
 main.py — BG Remover entry point.
 """
 
+import os
 import sys
 
 from PyQt6.QtWidgets import QApplication
@@ -76,12 +77,21 @@ def main():
         Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
     )
 
+    from PyQt6.QtGui import QIcon
+
     app = QApplication(sys.argv)
     app.setApplicationName(__app_name__)
     app.setApplicationVersion(__version__)
     app.setOrganizationName("Long Weekend Labs")
 
     _apply_system_theme(app)
+
+    icon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "icons", "icon.png")
+    if hasattr(sys, "_MEIPASS"):
+        icon_path = os.path.join(sys._MEIPASS, "icons", "icon.png")
+    if os.path.exists(icon_path):
+        app.setWindowIcon(QIcon(icon_path))
 
     window = MainWindow()
     window.show()
