@@ -193,10 +193,17 @@ jobs:
 
       - name: Install Python dependencies
         working-directory: bg_remover_app
-        run: pip install pyinstaller PyQt6 Pillow "rembg[cpu]"
+        run: pip install pyinstaller PyQt6 Pillow "rembg[cpu]" "onnxruntime==1.19.2"
 
       - name: Install Inno Setup
         run: choco install innosetup -y
+
+      - name: Add onnxruntime to PATH for PyInstaller analysis
+        shell: powershell
+        run: |
+          $ortDir = python -c "import onnxruntime, os; print(os.path.join(os.path.dirname(onnxruntime.__file__), 'capi'))"
+          echo "onnxruntime capi dir: $ortDir"
+          echo "$ortDir" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Build Windows packages
         working-directory: bg_remover_app
