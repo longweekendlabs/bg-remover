@@ -2,10 +2,11 @@
 
 **AI-powered batch background removal — 100% offline.**
 
-Drop your character sprites and artwork; get clean transparent PNGs without cloud APIs, subscriptions, or watermarks. Built for Visual Novel developers who need to process large numbers of sprites quickly.
-
 [![GitHub Release](https://img.shields.io/github/v/release/longweekendlabs/bg-remover?style=flat-square)](https://github.com/longweekendlabs/bg-remover/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+[![Platform: Windows | Linux](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-lightgrey?style=flat-square)](#download)
+
+Drop your character sprites and artwork; get clean transparent PNGs without cloud APIs, subscriptions, or watermarks. Built for Visual Novel developers who need to process large numbers of sprites quickly.
 
 ---
 
@@ -24,21 +25,20 @@ Drop your character sprites and artwork; get clean transparent PNGs without clou
 
 | Platform | Package | Notes |
 |---|---|---|
-| Linux (any distro) | `.AppImage` | Run directly, no install |
-| Fedora / RHEL | `.rpm` | `sudo dnf install bg-remover-*.rpm` |
-| Ubuntu / Mint | `.deb` | `sudo dpkg -i bg-remover_*.deb` |
-| Linux archive | `.tar.gz` | Extract and run |
-| Windows (installer) | `-Setup.exe` | Installs to Start Menu |
-| Windows (portable) | `-portable.zip` | No install, run anywhere |
+| **Linux (any distro)** | `.AppImage` | Run directly, no install |
+| **Fedora / RHEL** | `.rpm` | `sudo dnf install bg-remover-*.rpm` |
+| **Ubuntu / Mint** | `.deb` | `sudo dpkg -i bg-remover_*.deb` |
+| **Windows (installer)** | `-Setup.exe` | Installs to Start Menu |
+| **Windows (portable)** | `.zip` | No install, run anywhere |
 
 **→ [Download latest release](https://github.com/longweekendlabs/bg-remover/releases/latest)**
 
-## Supported formats
+## Supported Formats
 
 **Input:** PNG, JPG, JPEG, WEBP
 **Output:** PNG (transparent)
 
-## Running from source
+## Running from Source
 
 ```bash
 git clone https://github.com/longweekendlabs/bg-remover.git
@@ -60,8 +60,6 @@ python main.py
 | `u2net` | U2Net | General purpose, faster | ~176 MB |
 | `silueta` | Silueta | Simple subjects, fastest | ~43 MB |
 
-Each model downloads once and is cached in `~/.u2net/`.
-
 ## Building
 
 ### Linux
@@ -69,7 +67,6 @@ Each model downloads once and is cached in `~/.u2net/`.
 ```bash
 pip install pyinstaller
 bash build_linux.sh
-# Outputs: lin/*.AppImage  lin/*.rpm  lin/*.deb  lin/*.tar.gz
 ```
 
 ### Windows
@@ -77,17 +74,14 @@ bash build_linux.sh
 ```bat
 pip install pyinstaller
 build_windows.bat
-:: Outputs: win\*-portable.zip  win\*-Setup.exe (if Inno Setup installed)
 ```
 
-## Release process
+## Release Process
 
 ```bash
 git tag v1.2.0
 git push origin v1.2.0
 ```
-
-GitHub Actions automatically builds all packages and creates a release.
 
 ---
 
