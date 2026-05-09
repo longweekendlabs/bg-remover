@@ -42,3 +42,15 @@ desktop.ini
 *.swp
 *.swo
 *~
+
+# Local agent and handoff notes
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+PROJECT.md
+ROADMAP.md
+DEPLOYMENT.md
+HANDOFF.md
+handoff.md
+archive/
+.github/copilot-instructions.md
