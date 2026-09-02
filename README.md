@@ -1,87 +1,48 @@
 # BG Remover
 
-**AI-powered batch background removal — 100% offline.**
+**Batch background removal, entirely offline.**
 
 [![GitHub Release](https://img.shields.io/github/v/release/longweekendlabs/bg-remover?style=flat-square)](https://github.com/longweekendlabs/bg-remover/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
-[![Platform: Windows | Linux](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-lightgrey?style=flat-square)](#download)
+[![Platforms](https://img.shields.io/badge/platform-Windows%20x64%20%7C%20Linux%20x64-lightgrey?style=flat-square)](https://github.com/longweekendlabs/bg-remover/releases/latest)
 
-Drop your character sprites and artwork; get clean transparent PNGs without cloud APIs, subscriptions, or watermarks. Built for Visual Novel developers who need to process large numbers of sprites quickly.
+Drag in a folder of character sprites and get clean transparent PNGs back. BG Remover was built for visual novel developers cutting out hundreds of sprites at a time, and it does that work on your own machine: no cloud API, no account, no per-image cost, no watermark.
 
----
+### [Download for Windows and Linux](https://github.com/longweekendlabs/bg-remover/releases/latest)
 
-## Features
+## Feed it a folder, not one file at a time
 
-- **Drag & drop** images or whole folders into the queue
-- **6 AI models** — BiRefNet Portrait (best for sprites), BiRefNet General, ISNet, U2Net Human, U2Net, Silueta
-- **Batch processing** — queue up hundreds of files, process while you work
-- **Before / after preview** — checkerboard transparency view per model, side by side
-- **Per-model result cache** — switch models on the preview without re-processing
-- **Single-file preview** — test a model on one image before committing the batch
-- **100% offline** — models download once (~175 MB), then no internet needed
-- **Dark UI** — easy on the eyes for long sessions
+Drag in individual images or whole folder trees. The queue takes hundreds of files and works through them while you do something else. Input is PNG, JPG, JPEG, or WEBP; output is always transparent PNG.
+
+Test on one image first if you want. Single-file preview runs a model against one picture so you can judge the cutout before committing the batch.
+
+## Six models, and switching between them is free
+
+BiRefNet Portrait and BiRefNet General for the best quality, ISNet when the edges are fussy, U2Net Human and U2Net when you want speed, and Silueta for simple subjects on the fastest setting.
+
+Results are cached per model. Once an image has been through BiRefNet, flipping the preview to ISNet and back costs nothing, so you can compare cutouts side by side against a checkerboard instead of guessing which model suits a sprite.
+
+## Nothing leaves your machine
+
+Each model downloads once, between 43 MB and 176 MB depending on which one, and is cached in `~/.u2net/`. After that the app never touches the network. Your artwork is never uploaded anywhere, because there is nowhere for it to go.
+
+## The rest
+
+Before and after preview with a checkerboard transparency view. A dark interface that does not glare at you through a long cutting session. Originals are never modified.
 
 ## Download
 
-| Platform | Package | Notes |
-|---|---|---|
-| **Linux (any distro)** | `.AppImage` | Run directly, no install |
-| **Fedora / RHEL** | `.rpm` | `sudo dnf install bg-remover-*.rpm` |
-| **Ubuntu / Mint** | `.deb` | `sudo dpkg -i bg-remover_*.deb` |
-| **Windows (installer)** | `-Setup.exe` | Installs to Start Menu |
-| **Windows (portable)** | `.zip` | No install, run anywhere |
+Windows and Linux x64 builds are on the [releases page](https://github.com/longweekendlabs/bg-remover/releases/latest): a Windows installer and portable zip, and an AppImage, RPM, DEB, and tar.gz for Linux.
 
-**→ [Download latest release](https://github.com/longweekendlabs/bg-remover/releases/latest)**
+## Feedback
 
-## Supported Formats
+[Open an issue](https://github.com/longweekendlabs/bg-remover/issues) for a bug or a request. To write privately, email [iemrecnl@gmail.com](mailto:iemrecnl@gmail.com?subject=BG%20Remover%20feedback) and mention your version.
 
-**Input:** PNG, JPG, JPEG, WEBP
-**Output:** PNG (transparent)
+## License
 
-## Running from Source
+MIT License. See [LICENSE](LICENSE). Free and open source: no licence key, no trial, no subscription.
 
-```bash
-git clone https://github.com/longweekendlabs/bg-remover.git
-cd bg-remover/bg_remover_app
-pip install PyQt6 Pillow "rembg[cpu]"
-python main.py
-```
-
-> **Note:** On first run, rembg downloads the selected AI model (~175 MB). After that the app works fully offline.
-
-## AI Models
-
-| Model | Label | Best for | Download |
-|---|---|---|---|
-| `birefnet-portrait` | BiRefNet Portrait ★ | Character sprites & portraits (default) | ~175 MB |
-| `birefnet-general` | BiRefNet General | General purpose, high quality | ~175 MB |
-| `isnet-general-use` | ISNet | Detailed edges | ~100 MB |
-| `u2net_human_seg` | U2Net Human | Human figures, faster | ~176 MB |
-| `u2net` | U2Net | General purpose, faster | ~176 MB |
-| `silueta` | Silueta | Simple subjects, fastest | ~43 MB |
-
-## Building
-
-### Linux
-
-```bash
-pip install pyinstaller
-bash build_linux.sh
-```
-
-### Windows
-
-```bat
-pip install pyinstaller
-build_windows.bat
-```
-
-## Release Process
-
-```bash
-git tag v1.2.0
-git push origin v1.2.0
-```
+© 2026 Long Weekend Labs
 
 ---
 
