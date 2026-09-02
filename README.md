@@ -24,7 +24,7 @@ Results are cached per model. Once an image has been through BiRefNet, flipping 
 
 ## Nothing leaves your machine
 
-Each model downloads once, between 43 MB and 176 MB depending on which one, and is cached in `~/.u2net/`. After that the app never touches the network. Your artwork is never uploaded anywhere, because there is nowhere for it to go.
+Each model downloads once, between 43 MB and 176 MB depending on which one, and is cached in `~/.u2net/`. Point `U2NET_HOME` somewhere else if you would rather it lived on another disk. After that the app never touches the network. Your artwork is never uploaded anywhere, because there is nowhere for it to go.
 
 ## The rest
 
