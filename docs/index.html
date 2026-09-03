@@ -74,6 +74,17 @@
     }
     .btn-secondary:hover { background: var(--border); }
 
+    /* PRODUCT VIEWS */
+    .hero-product { max-width: 1040px; margin: -42px auto 0; padding: 0 24px 24px; }
+    .hero-product img, .shot-card img {
+      display: block; width: 100%; height: auto; border-radius: 12px;
+      border: 1px solid var(--border); box-shadow: 0 24px 70px rgba(0,0,0,.32);
+    }
+    .shot-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .shot-card { margin: 0; }
+    .shot-card figcaption { margin-top: 10px; color: var(--dim); font-size: .84rem; }
+    @media (max-width: 720px) { .shot-grid { grid-template-columns: 1fr; } }
+
     /* SECTIONS */
     section { padding: 80px 24px; max-width: 1040px; margin: 0 auto; }
     section h2 { font-size: 1.7rem; font-weight: 700; color: var(--white); margin-bottom: 40px; text-align: center; }
@@ -187,6 +198,10 @@
   </div>
 </div>
 
+<figure class="hero-product">
+  <img src="screenshots/hero.png" alt="BG Remover processing a queue of character sprites with transparent results appearing beside pending files">
+</figure>
+
 <!-- FEATURES -->
 <section id="features">
   <h2>Everything you need. Nothing you don't.</h2>
@@ -231,6 +246,20 @@
       <h3>Linux &amp; Windows</h3>
       <p>Native packages for Fedora, Ubuntu, AppImage, and Windows. Built for KDE Plasma Wayland.</p>
     </div>
+  </div>
+</section>
+
+<section aria-labelledby="product-views-title">
+  <h2 id="product-views-title">Judge the edge. Choose the model.</h2>
+  <div class="shot-grid">
+    <figure class="shot-card">
+      <img src="screenshots/cutout-detail.png" alt="A finished portrait cutout shown at full size against a transparency checkerboard">
+      <figcaption>Inspect the finished edge at full size before committing a batch.</figcaption>
+    </figure>
+    <figure class="shot-card">
+      <img src="screenshots/model-picker.png" alt="All six background-removal models available in the application">
+      <figcaption>Six local models cover portraits, difficult edges, general subjects, and fast drafts.</figcaption>
+    </figure>
   </div>
 </section>
 

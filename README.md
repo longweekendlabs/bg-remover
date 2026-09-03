@@ -10,17 +10,23 @@ Drag in a folder of character sprites and get clean transparent PNGs back. BG Re
 
 ### [Download for Windows and Linux](https://github.com/longweekendlabs/bg-remover/releases/latest)
 
+![BG Remover processing a queue of character sprites with transparent results appearing beside pending files](docs/screenshots/hero.png)
+
 ## Feed it a folder, not one file at a time
 
 Drag in individual images or whole folder trees. The queue takes hundreds of files and works through them while you do something else. Input is PNG, JPG, JPEG, or WEBP; output is always transparent PNG.
 
 Test on one image first if you want. Single-file preview runs a model against one picture so you can judge the cutout before committing the batch.
 
+![A finished portrait cutout shown at full size against BG Remover's transparency checkerboard](docs/screenshots/cutout-detail.png)
+
 ## Six models, and switching between them is free
 
 BiRefNet Portrait and BiRefNet General for the best quality, ISNet when the edges are fussy, U2Net Human and U2Net when you want speed, and Silueta for simple subjects on the fastest setting.
 
 Results are cached per model. Once an image has been through BiRefNet, flipping the preview to ISNet and back costs nothing, so you can compare cutouts side by side against a checkerboard instead of guessing which model suits a sprite.
+
+![BG Remover's six model choices including BiRefNet, ISNet, U2Net and Silueta](docs/screenshots/model-picker.png)
 
 ## Nothing leaves your machine
 
