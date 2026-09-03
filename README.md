@@ -36,7 +36,7 @@ Windows and Linux x64 builds are on the [releases page](https://github.com/longw
 
 ## Feedback
 
-[Open an issue](https://github.com/longweekendlabs/bg-remover/issues) for a bug or a request. To write privately, email [iemrecnl@gmail.com](mailto:iemrecnl@gmail.com?subject=BG%20Remover%20feedback) and mention your version.
+[Open an issue](https://github.com/longweekendlabs/bg-remover/issues) for a bug or a request.
 
 ## License
 
