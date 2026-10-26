@@ -126,7 +126,7 @@ jobs:
           /usr/share/icons/hicolor/256x256/apps/bg-remover.png
 
           %changelog
-          * $(date "+%a %b %d %Y") Long Weekend Labs <longweekendlabs@users.noreply.github.com> - ${VERSION}-1
+          * $(date "+%a %b %d %Y") Long Weekend Labs <2272935+longweekendlabs@users.noreply.github.com> - ${VERSION}-1
           - v${VERSION} release
           SPECEOF
 
@@ -166,7 +166,7 @@ jobs:
           Package: bg-remover
           Version: ${VERSION}
           Architecture: amd64
-          Maintainer: Long Weekend Labs <longweekendlabs@users.noreply.github.com>
+          Maintainer: Long Weekend Labs <2272935+longweekendlabs@users.noreply.github.com>
           Description: AI-powered batch background removal
           CTRL
 
